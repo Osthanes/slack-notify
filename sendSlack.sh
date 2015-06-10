@@ -38,7 +38,8 @@ if [ -z "$SLACK_COLOR" ]; then
 fi
 
 URL="https://hooks.slack.com/services/$SLACK_WEBHOOK_PATH"
+MSG=$(echo "$*" | sed 's/"/\\\"/g')
 
-PAYLOAD="{\"attachments\":[{""\"text\": \"$*\", \"color\": \"$SLACK_COLOR\"}]}"
+PAYLOAD="{\"attachments\":[{""\"text\": \"$MSG\", \"color\": \"$SLACK_COLOR\"}]}"
 
 curl -X POST --data-urlencode "payload=$PAYLOAD" $URL
