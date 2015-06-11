@@ -37,7 +37,13 @@ if [ -z "$SLACK_COLOR" ]; then
     SLACK_COLOR="d3d3d3"
 fi
 
-URL="https://hooks.slack.com/services/$SLACK_WEBHOOK_PATH"
+echo $SLACK_WEBHOOK_PATH | grep "https://hooks.slack.com/services/"
+FULL_PATH=$?
+if [ $FULL_PATH -ne 0 ]; then 
+    URL="https://hooks.slack.com/services/$SLACK_WEBHOOK_PATH"
+else 
+    URL=$SLACK_WEBHOOK_PATH
+fi 
 MSG=$(echo "$*" | sed 's/"/\\\"/g')
 
 PAYLOAD="{\"attachments\":[{""\"text\": \"$MSG\", \"color\": \"$SLACK_COLOR\"}]}"
