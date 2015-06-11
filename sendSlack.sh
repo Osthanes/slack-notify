@@ -46,6 +46,20 @@ else
 fi 
 MSG=$(echo "$*" | sed 's/"/\\\"/g')
 
+# If we are running in an IDS job set a URL for the sender 
+if [ -n "${IDS_PROJECT_NAME}" ]; then 
+    echo "setting sender"
+    MY_IDS_PROJECT=${IDS_PROJECT_NAME##*| } 
+    MY_IDS_USER=${IDS_PROJECT_NAME%% |*}
+    MY_IDS_URL="${IDS_URL}/${MY_IDS_USER}/${MY_IDS_PROJECT}"
+    SENDER="<${MY_IDS_URL}|${MY_IDS_PROJECT}-${MY_IDS_USER}>"
+    MSG="${SENDER}: ${MSG}"
+    echo ${MSG}
+else
+    echo "not setting sender:${IDS_PROJECT_NAME}"
+fi 
+
+echo $PAYLOAD
 PAYLOAD="{\"attachments\":[{""\"text\": \"$MSG\", \"color\": \"$SLACK_COLOR\"}]}"
 
 curl -X POST --data-urlencode "payload=$PAYLOAD" $URL
