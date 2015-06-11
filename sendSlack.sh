@@ -51,11 +51,8 @@ if [ -n "${IDS_PROJECT_NAME}" ]; then
     echo "setting sender"
     MY_IDS_PROJECT=${IDS_PROJECT_NAME##*| } 
     MY_IDS_USER=${IDS_PROJECT_NAME%% |*}
-    if [ -z "${IDS_TARGET}" ]; then 
-        IDS_TARGET="https://hub.jazz.net"
-    fi 
-    IDS_URL="${IDS_TARGET}/pipeline/${MY_IDS_USER}/${MY_IDS_PROJECT}"
-    SENDER="<${IDS_URL}|${MY_IDS_PROJECT}-${MY_IDS_USER}>"
+    MY_IDS_URL="${IDS_URL}/${MY_IDS_USER}/${MY_IDS_PROJECT}"
+    SENDER="<${MY_IDS_URL}|${MY_IDS_PROJECT}-${MY_IDS_USER}>"
     MSG="${SENDER}: ${MSG}"
     echo ${MSG}
 else
