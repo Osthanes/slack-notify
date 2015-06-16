@@ -23,7 +23,7 @@ export red='\e[0;31m'
 export label_color='\e[0;33m'
 export no_color='\e[0m' # No Color
 
-# return codes for various errors
+# Return codes for various errors
 RC_BAD_USAGE=254
 RC_NOTIFY_MSG_USAGE=2
 RC_NOTIFY_LEVEL_USAGE=3
@@ -123,14 +123,12 @@ INVALID_ARGUMENTS=$*
 [ -z "${NOTIFY_MSG}" ] && usage && die ${RC_NOTIFY_MSG_USAGE}
 [ -z "${NOTIFY_LEVEL}" ] && [ -z "${NOTIFY_MSG}" ] && usage && die ${RC_NOTIFY_LEVEL_USAGE}
 
-if [ -z "$NOTIFY_LEVEL" ]; then
-    echo -e "You can set the notification level using the NOTIFY_LEVEL environment variable\n   Valid values are 'good', 'info', 'bad'"
-else
-    NOTIFY_LEVEL=$(echo $NOTIFY_LEVEL | tr '[:upper:]' '[:lower:]')
-fi
-
+# Check if the SLACK_COLOR set in environment variable, then use SLACK_COLOR for the setting the color.
+# If SLACK_COLOR is not set, then check the NOTIFY_LEVEL and set it to the SLACK_COLOR.
+# If both SLACK_COLOR and NOTIFY_LEVEL are not set, then don't specify the color by setting SLACK_COLOR to null. 
 if [ -z "$SLACK_COLOR" ]; then 
     if [ -n "$NOTIFY_MSG" ] && [ -n "NOTIFY_LEVEL" ]; then
+        NOTIFY_LEVEL=$(echo $NOTIFY_LEVEL | tr '[:upper:]' '[:lower:]')
         case $NOTIFY_LEVEL in
             GOOD|good)
                 SLACK_COLOR=$SLACK_COLOR_GOOD;;
@@ -142,12 +140,16 @@ if [ -z "$SLACK_COLOR" ]; then
                 SLACK_COLOR="";;
         esac
     fi
+else
+    SLACK_COLOR=$(echo $SLACK_COLOR | tr '[:upper:]' '[:lower:]')
 fi 
 
+# Check if the message token has been set
 if [ -z "$SLACK_WEBHOOK_PATH" ]; then
     die ${RC_SLACK_WEBHOOK_PATH}
 fi
 
+# Send message to the Slack
 if [ -n "$SLACK_WEBHOOK_PATH" ]; then
     echo $SLACK_WEBHOOK_PATH | grep "https://hooks.slack.com/services/"
     FULL_PATH=$?
