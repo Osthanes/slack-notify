@@ -139,7 +139,7 @@ if [ -z "$SLACK_COLOR" ]; then
             INFO|info)
                 SLACK_COLOR=$SLACK_COLOR_WARNING;;
             *) 
-                SLACK_COLOR=$NOTIFY_LEVEL;;
+                SLACK_COLOR="";;
         esac
     fi
 fi 
