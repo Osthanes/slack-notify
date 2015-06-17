@@ -34,6 +34,10 @@ SLACK_COLOR_GOOD="good"
 SLACK_COLOR_WARNING="warning"
 SLACK_COLOR_DANGER="danger"
 
+debugme() {
+  [[ $DEBUG = 1 ]] && "$@" || :
+}
+
 #############################################################################
 # usage
 #############################################################################
@@ -42,20 +46,20 @@ usage()
 {
    /bin/cat << EOF
 Send notification massage.
-Usage: [-m notify_message]
-       [-l notify_level] [-m notify_message]
+Usage: [-d] [-l notify_level] -m notify_message
        [-h]
 
 Options:
-  -m    Use notification massage for user input
-  -l    Use notification level for user input. You can set the notification level using the NOTIFY_LEVEL environment variable.
+  -m    (required) Use notification massage for user input
+  -l    (recommended) Use notification level for user input. You can set the notification level using the NOTIFY_LEVEL environment variable.
         Valid values are 'good', 'info', and 'bad'. 
   -h    Display this help message and exit
+  -d    (optional) Debug information  
 
 Notes:
   SLACK_WEBHOOK_PATH: Specify the Slack Webhook URL
     In order to send Slack notification you must specify the Slack Webhook URL
-    in an environment variable called 'SLACK_WEBHOOK_PATH' like this:
+    in an environment variablecalled 'SLACK_WEBHOOK_PATH' like this:
       SLACK_WEBHOOK_PATH=T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
     You can use or create a new Slack Webhook URL using the following steps:
       1. Go to Slack Integration page of your project (https://blue-alchemy.slack.com/services).
@@ -83,7 +87,9 @@ Notes:
     |---------------|---------|---------|--------|---------|
     |    info       |         |         |        |   X     |
     |---------------|---------|---------|--------|---------|
-     
+  
+  Set DEBUG=1 for more information or -d 
+
 EOF
 }
 
@@ -102,14 +108,16 @@ msgid_3()
 
 msgid_4()
 {
-    echo -e "${red}SLACK_WEBHOOK_PATH environment variable must be set before invoking this script${no_color}"
-    echo -e "In order to send Slack notification you must specify the Slack Webhook URL"
-    echo -e "in an environment variable called 'SLACK_WEBHOOK_PATH' like this:"
-    echo -e "export SLACK_WEBHOOK_PATH=T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
-    echo -e "You can use or create a new Slack Webhook URL using the following steps:"
-    echo -e "   1. Go to Slack Integration page of your project (https://blue-alchemy.slack.com/services) "
-    echo -e "   2. Find the Incoming WebHooks and Click on 'Configured'"
-    echo -e "   3. You can add new Webhook URL or select existing one."}
+    if [[ $DEBUG = 1 ]]; then 
+        echo -e "${red}SLACK_WEBHOOK_PATH environment variable must be set before invoking this script${no_color}"
+        echo -e "In order to send Slack notification you must specify the Slack Webhook URL"
+        echo -e "in an environment variable called 'SLACK_WEBHOOK_PATH' like this:"
+        echo -e "export SLACK_WEBHOOK_PATH=T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
+        echo -e "You can use or create a new Slack Webhook URL using the following steps:"
+        echo -e "   1. Go to Slack Integration page of your project (https://blue-alchemy.slack.com/services) "
+        echo -e "   2. Find the Incoming WebHooks and Click on 'Configured'"
+        echo -e "   3. You can add new Webhook URL or select existing one."
+    fi 
 }
 
 #############################################################################
@@ -126,11 +134,12 @@ die()
 #############################################################################
 
 # Set options from the command line.
-while getopts ":m:l:h:" FLAG; do
+while getopts ":m:l:h:d" FLAG; do
    case ${FLAG} in
       m) NOTIFY_MSG=${OPTARG} ;;
       l) NOTIFY_LEVEL=${OPTARG} ;;
       h) usage && exit 0;;
+      d) export DEBUG=1;;
       ?) usage && exit ${RC_BAD_USAGE}
    esac
 done
@@ -162,7 +171,7 @@ else
     SLACK_COLOR=$(echo $SLACK_COLOR | tr '[:upper:]' '[:lower:]')
 fi
  
-echo -e "Input Info:  SLACK_COLOR = '${SLACK_COLOR}', NOTIFY_FILTER = '${NOTIFY_FILTER}', NOTIFY_LEVEL = '${NOTIFY_LEVEL}', NOTIFY_MSG = '${NOTIFY_MSG}'"
+debugme echo -e "Input Info:  SLACK_COLOR = '${SLACK_COLOR}', NOTIFY_FILTER = '${NOTIFY_FILTER}', NOTIFY_LEVEL = '${NOTIFY_LEVEL}', NOTIFY_MSG = '${NOTIFY_MSG}'"
  
 sendMsg=true
 if [ -z "$NOTIFY_FILTER" ]; then 
@@ -197,12 +206,12 @@ else
     if [ -z "$SLACK_WEBHOOK_PATH" ]; then
         die ${RC_SLACK_WEBHOOK_PATH}
     else
-        echo -e "Slack Webhook URL token: '${SLACK_WEBHOOK_PATH}'"
+        debugme echo -e "Slack Webhook URL token: '${SLACK_WEBHOOK_PATH}'"
     fi
 
     # Send message to the Slack
     if [ -n "$SLACK_WEBHOOK_PATH" ]; then
-        echo $SLACK_WEBHOOK_PATH | grep "https://hooks.slack.com/services/"
+        echo $SLACK_WEBHOOK_PATH | grep "https://hooks.slack.com/services/" >/dev/null
         FULL_PATH=$?
         if [ $FULL_PATH -ne 0 ]; then 
             URL="https://hooks.slack.com/services/$SLACK_WEBHOOK_PATH"
@@ -214,20 +223,20 @@ else
 
         # If we are running in an IDS job set a URL for the sender 
         if [ -n "${IDS_PROJECT_NAME}" ]; then 
-            echo -e "setting sender"
+            debugme echo -e "setting sender"
             MY_IDS_PROJECT=${IDS_PROJECT_NAME##*| } 
             MY_IDS_USER=${IDS_PROJECT_NAME%% |*}
             MY_IDS_URL="${IDS_URL}/${MY_IDS_USER}/${MY_IDS_PROJECT}"
             SENDER="<${MY_IDS_URL}|${MY_IDS_PROJECT}-${MY_IDS_USER}>"
             MSG="${SENDER}: ${NOTIFY_MSG}"
         else
-            echo -e "Sender of notification message is not defined"
+            debugme echo -e "Sender of notification message is not defined"
         fi 
 
         echo -e "Sending notification message:  '${NOTIFY_MSG}'"
 
         PAYLOAD="{\"attachments\":[{""\"text\": \"$MSG\", \"color\": \"$SLACK_COLOR\"}]}"
-        echo -e "Slack Payload: ${PAYLOAD}"
+        debugme echo -e "Slack Payload: ${PAYLOAD}"
 
         RESPONSE=$(curl --write-out %{http_code} --silent --output /dev/null -X POST --data-urlencode "payload=$PAYLOAD" $URL)
         RESULT=$?
