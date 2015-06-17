@@ -9,21 +9,20 @@ A simple bash script to send a notification message. It is currently supported f
 Synopsis:
 
     ./sendMessage.sh [-h ]
-    ./sendMessage.sh [-m notify_message]
-    ./sendMessage.sh [-l notify_level] [-m notify_message]
+    ./sendMessage.sh [-d] [-l notify_level] -m notify_message
 
 Usage:  
 
-        [-m notify_message]
-        [-l notify_level] [-m notify_message]
+        [-d] [-l notify_level] -m notify_message
         [-h]
 
 Options:
 
         -h      Display this help message and exit
-        -m      Use notification massage for user input
-        -l      Use notification level for user input. You can set the notification level using the NOTIFY_LEVEL environment variable.
+        -m      (required) Use notification massage for user input
+        -l      (recommended) Use notification level for user input. You can set the notification level using the NOTIFY_LEVEL environment variable.
                 Valid values are 'good', 'info', and 'bad'. 
+        -d      (optional) Debug information 
 
 Notes:
 
