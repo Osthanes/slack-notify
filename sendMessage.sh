@@ -164,34 +164,34 @@ fi
  
 echo -e "Input Info:  SLACK_COLOR = '${SLACK_COLOR}', NOTIFY_FILTER = '${NOTIFY_FILTER}', NOTIFY_LEVEL = '${NOTIFY_LEVEL}', NOTIFY_MSG = '${NOTIFY_MSG}'"
  
-sendMsg=false 
+sendMsg=true
 if [ -z "$NOTIFY_FILTER" ]; then 
-    if [ -z "$NOTIFY_LEVEL" ] || [ "$NOTIFY_LEVEL" == "bad" ] [ "$NOTIFY_LEVEL" == "good" ]; then
-        sendMsg=true
+    if [ -n "$NOTIFY_LEVEL" ] && [ "$NOTIFY_LEVEL" != "bad" ] && [ "$NOTIFY_LEVEL" != "good" ]; then
+        sendMsg=false
     fi
-elif 
+else 
     NOTIFY_FILTER=$(echo $NOTIFY_FILTER | tr '[:upper:]' '[:lower:]')
     if [ "$NOTIFY_FILTER" == "bad" ]; then
-        if [ -z "$NOTIFY_LEVEL" ] || [ "$NOTIFY_LEVEL" == "bad" ]; then
-            sendMsg=true
+        if [ -n "$NOTIFY_LEVEL" ] && [ "$NOTIFY_LEVEL" != "bad" ]; then
+            sendMsg=false
         fi
     elif [ "$NOTIFY_FILTER" == "good" ]; then
-        if [ -z "$NOTIFY_LEVEL" ] || [ "$NOTIFY_LEVEL" == "bad" ] || [ "$NOTIFY_LEVEL" == "good" ]; then
-            sendMsg=true
+        if [ -n "$NOTIFY_LEVEL" ] && [ "$NOTIFY_LEVEL" != "bad" ] && [ "$NOTIFY_LEVEL" != "good" ]; then
+            sendMsg=false
         fi
     elif [ "$NOTIFY_FILTER" == "info" ]; then
-        if [ -z "$NOTIFY_LEVEL" ] || [ "$NOTIFY_LEVEL" == "bad" ] || [ "$NOTIFY_LEVEL" == "good" ] || [ "$NOTIFY_LEVEL" == "info" ]; then
-            sendMsg=true
+        if [ -n "$NOTIFY_LEVEL" ] && [ "$NOTIFY_LEVEL" != "bad" ] && [ "$NOTIFY_LEVEL" != "good" ] && [ "$NOTIFY_LEVEL" != "info" ]; then
+            sendMsg=false
         fi    
     else
-        if [ "$NOTIFY_LEVEL" == "info" ]; then
-            sendMsg=true
+        if [ -n "$NOTIFY_LEVEL" ] && [ "$NOTIFY_LEVEL" != "bad" ] && [ "$NOTIFY_LEVEL" != "good" ]; then
+            sendMsg=false
         fi
     fi
 fi
 
 if [ "$sendMsg" == false ]; then
-    echo -e "Ignoring to send Notification message because the NOTIFY_FILTER = ${NOTIFY_FILTER} and NOTIFY_LEVEL = ${NOTIFY_LEVEL}"
+    echo -e "Ignoring to send Notification message because the NOTIFY_FILTER = '${NOTIFY_FILTER}' and NOTIFY_LEVEL = '${NOTIFY_LEVEL}'"
 else
     # Check if the message token has been set
     if [ -z "$SLACK_WEBHOOK_PATH" ]; then
@@ -221,7 +221,7 @@ else
             SENDER="<${MY_IDS_URL}|${MY_IDS_PROJECT}-${MY_IDS_USER}>"
             MSG="${SENDER}: ${NOTIFY_MSG}"
         else
-            echo -e "the notification sender is not defined"
+            echo -e "Sender of notification message is not defined"
         fi 
 
         echo -e "Sending notification message:  '${NOTIFY_MSG}'"
@@ -237,17 +237,17 @@ else
                 exit 0
             elif [ "$RESPONSE" -eq 404 ]; then
                 echo -e "${red}Slack notification message has been failed with (Response code = ${RESPONSE} 'Bad Slack Webhook URL token'.${no_color})"
-                exit 1
+                exit $RESPONSE
             elif [ "$RESPONSE" -eq 500 ]; then
                 echo -e "${red}Slack notification message has been failed with (Response code = ${RESPONSE} 'Salck Payload was not valid'.${no_color})"
-                exit 1
+                exit $RESPONSE
             else
                 echo -e "${red}Slack notification message has been failed with (Response code = ${RESPONSE}).${no_color}"
-                exit 1
+                exit $RESPONSE
             fi
         else
             echo -e "${red}curl command failed with retun code value ${RESULT}${no_color}"
-            exit 1
+            exit $RESULT
 
         fi
    fi
