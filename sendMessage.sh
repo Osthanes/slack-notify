@@ -59,7 +59,7 @@ Options:
 Notes:
   SLACK_WEBHOOK_PATH: Specify the Slack Webhook URL
     In order to send Slack notification you must specify the Slack Webhook URL
-    in an environment variablecalled 'SLACK_WEBHOOK_PATH' like this:
+    in an environment variable called 'SLACK_WEBHOOK_PATH' like this:
       SLACK_WEBHOOK_PATH=T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
     You can use or create a new Slack Webhook URL using the following steps:
       1. Go to Slack Integration page of your project (https://blue-alchemy.slack.com/services).
