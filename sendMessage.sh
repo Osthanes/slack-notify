@@ -108,8 +108,8 @@ msgid_3()
 
 msgid_4()
 {
+    echo -e "${label_color}To send slack notifications set SLACK_WEBHOOK_PATH in the environment${no_color}"
     if [[ $DEBUG = 1 ]]; then 
-        echo -e "${red}SLACK_WEBHOOK_PATH environment variable must be set before invoking this script${no_color}"
         echo -e "In order to send Slack notification you must specify the Slack Webhook URL"
         echo -e "in an environment variable called 'SLACK_WEBHOOK_PATH' like this:"
         echo -e "export SLACK_WEBHOOK_PATH=T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
