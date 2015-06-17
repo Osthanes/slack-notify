@@ -1,10 +1,13 @@
 Purpose:
+
 ./sendMessage.sh - Send a notification message.
 
 Description:
+
 A simple bash script to send a notification message. It is currently supported for Slack when the user specify the Slack Webhook URL token. 
 
 Synopsis:
+
     ./sendMessage.sh [-h ]
     ./sendMessage.sh [-m notify_message]
     ./sendMessage.sh [-l notify_level] [-m notify_message]
@@ -14,12 +17,14 @@ Usage: [-m notify_message]
        [-h]
 
 Options:
+
   -m    Use notification massage for user input
   -l    Use notification level for user input. You can set the notification level using the NOTIFY_LEVEL environment variable.
         Valid values are 'good', 'info', and 'bad'. 
   -h    Display this help message and exit
 
 Notes:
+
   SLACK_WEBHOOK_PATH: Specify the Slack Webhook URL
     In order to send Slack notification you must specify the Slack Webhook URL
     in an environment variable called 'SLACK_WEBHOOK_PATH' like this:
