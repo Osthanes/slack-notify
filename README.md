@@ -1,3 +1,7 @@
+# Deprectated repository 
+These utilities have been moved to utilities repository in Osthanes 
+
+## Usage 
 Purpose:
 
 ./sendMessage.sh - Send a notification message.
